@@ -1,11 +1,14 @@
+#! /usr/bin/env python
+
 import requests
-import sys
+import MySQLdb
 from phant import Phant
 
+db = MySQLdb.connect(host='192.168.0.2', db='SensorDB', user='SensorNet', passwd='netsensor')
+cursor = db.cursor()
 p = Phant('xR32G9R4KXTjDVonKVa9', 'danger', 'bigmong', 'gigs', 'cooperx', private_key='ZaEpRZawDlS5wkXM0kJa')
 
 users = ('theDanger', 'BigMong', 'Gigs', 'CooperX')
-# list = [1,2,3,4]
 payload = [0, 0, 0, 0]
 payloader = 'p'
 index = 0
@@ -38,23 +41,22 @@ data = p.get()
 
 print 'Complete'
 
+# Prepare SQL query to INSERT a record into the database.
+sql = "INSERT INTO tblTinyRSS(TheDanger, BigMong, Gigs, CooperX) \
+VALUES ('%s', '%s', '%s', '%s')" % \
+      (payload[0], payload[1], payload[2], payload[3])
 
+print"sql ready for execution"
 
-
-
-
-
-# print user, html
-
-# datalist = html.split(';')
-# print 'dl', datalist
-# print datalist[0:2]
-# parsed = html.split(";")
-# print '2', parsed
-# nocoma = str(parsed).strip('[]')
-# print '3', nocoma
-# nocoma = ','.join(map(str,datalist))
-# print '4', nocoma
-# print len(nocoma), len(datalist)
-# total = datalist[0]
-# new = datalist[1]
+try:
+    # Execute the SQL command
+    print"SQL Injected!"
+    cursor.execute(sql)
+    # Commit your changes in the database
+    db.commit()
+    print "Committed"
+except:
+    # Rollback in case there is any error
+    db.rollback()
+    print "Error"
+db.close()
