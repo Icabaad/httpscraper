@@ -6,7 +6,7 @@ import MySQLdb
 from phant import Phant
 
 # mysql details
-db = MySQLdb.connect(host='192.168.0.2', db='SensorDB', user='SensorNet', passwd='netsensor')
+db = MySQLdb.connect(host='192.168.*.*', db='Sens*', user='Sens*', passwd='nets*')
 cursor = db.cursor()
 
 # phant server details
