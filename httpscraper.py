@@ -5,14 +5,15 @@ import requests
 import MySQLdb
 from phant import Phant
 
-#secret file parse
+# secret file parse
 file = open("secure.cfg", "rb")
-textstr = file.read();
+textstr = file.read()
 # file format dbname,dbuser,dbpass,emailpass,phantprivkey,utoobkey,
-print textstr
+# print textstr
 datalist = textstr.split(',')
-print datalist[0:6]
-print datalist[5]
+# print datalist[0:6]
+# print datalist[5]
+file.close()
 
 # mysql details
 db = MySQLdb.connect(host='192.168.0.2', db=datalist[0], user=datalist[1], passwd=datalist[2])
@@ -26,17 +27,18 @@ payloader = 'p'  # return var
 index = 0  # increment list
 
 # utoobs
-#url = 'https://www.googleapis.com/youtube/v3/channels?part=statistics&forUsername=' + username + '&key=' + key
+# url = 'https://www.googleapis.com/youtube/v3/channels?part=statistics&forUsername=' + username + '&key=' + key
 username = 'Icabaad'
 key = datalist[5]
 utooblist = [0, 0, 0]
 
-#Sends Email
+
+# Sends Email
 def send_mail(subject):
     to = 'icabaad@gmail.com'
     gmail_user = 'icabaad@gmail.com'
-    gmail_pwd = datalist[3];
-    smtpserver = smtplib.SMTP("smtp.gmail.com",587)
+    gmail_pwd = datalist[3]
+    smtpserver = smtplib.SMTP("smtp.gmail.com", 587)
     smtpserver.ehlo()
     smtpserver.starttls()
     smtpserver.ehlo
@@ -47,6 +49,7 @@ def send_mail(subject):
     smtpserver.sendmail(gmail_user, to, msg)
     print 'done!'
     smtpserver.close()
+
 
 # scrapes data and puts in a list
 def get_tinyrssusr_data(x):
@@ -66,39 +69,39 @@ def get_utoob_stats(user, apikey):
     response2 = requests.get(utooburl)
     html2 = response2.content
     parse = html2.split(":")
-    relist = re.findall("[0-9]+", html2)
+    relist = re.findall("\d{2,}", html2)
     print relist
-    #print relist[23]
-    #print relist[25]
-    #print relist[26]
-    totalwatched = relist[21]
-    totalsubs = relist[23]
-    totalvids = relist[24]
+    # print relist[23]
+    # print relist[25]
+    # print relist[26]
+    totalwatched = relist[0]
+    totalsubs = relist[1]
+    totalvids = relist[2]
 
     return totalwatched, totalsubs, totalvids
+
 
 try:
     # loop through users until done
     for user in users:
         payloader = get_tinyrssusr_data(user)
-        #print user, payloader
+        # print user, payloader
         payload[index] = payloader
         index += 1
 
     print payload[0:4]
     index = 0
     p.log(payload[0], payload[1], payload[2], payload[3])  # log with phant server
-    #print(p.remaining_bytes, p.cap)
-    #data = p.get()
+    # print(p.remaining_bytes, p.cap)
+    # data = p.get()
     print 'TinyRSS Scrape Complete'
 except:
     print 'Unable to Scrape TinyRSS'
     send_mail('Unable to Scrape TinyRSS')
 
-
 try:
     utooblist = get_utoob_stats(username, key)
-    print 'Utoob: Watches: %s Subs: %s Vids: %s' % (utooblist)
+    print 'Utoob: Watches: %s Subs: %s Vids: %s' % utooblist
     print 'UToob Scrape Complete'
 
 except:
@@ -111,7 +114,7 @@ VALUES ('%s', '%s', '%s', '%s')" % \
       (payload[0], payload[1], payload[2], payload[3])
 sql2 = "INSERT INTO tblUToob(Views, Subscribers, Videos) \
 VALUES ('%s', '%s', '%s')" % \
-      (utooblist[0], utooblist[1], utooblist[2])
+       (utooblist[0], utooblist[1], utooblist[2])
 print"sql ready for execution...."
 
 try:
