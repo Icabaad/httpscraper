@@ -4,6 +4,7 @@ import re
 import requests
 import MySQLdb
 from phant import Phant
+import httplib
 
 # secret file parse
 file = open("secure.cfg", "rb")
@@ -18,6 +19,12 @@ file.close()
 # mysql details
 db = MySQLdb.connect(host='192.168.0.2', db=datalist[0], user=datalist[1], passwd=datalist[2])
 cursor = db.cursor()
+
+#EMONCMS details
+homedomain = "dangerproxy:8080"
+apikey = 'da3ae5f01b1245c3360ef85ddd8fb451'
+payload = 'string'
+conn = httplib.HTTPConnection(homedomain)
 
 # phant server details
 p = Phant('xR32G9R4KXTjDVonKVa9', 'danger', 'bigmong', 'gigs', 'cooperx', private_key=datalist[4])
@@ -131,3 +138,22 @@ except:
     db.rollback()
     print "SQL Error"
     send_mail('Unable to Save to MySQL')
+
+#Post to EmonCMS locally
+payload = '{' + "TheDangerRSS:%s,BigMongRSS:%s,GigsRSS:%s,CooperX:%s" % (payload[0], payload[1], payload[2], payload[3]) + '}'
+print payload
+try:
+    conn.request("GET", "/emoncms/input/post.json?node=1&apikey=" + apikey + "&json=" + payload)
+    response = conn.getresponse()
+    conn.close()
+except (httplib.HTTPException, socket.error) as ex:
+    print "Error: %s" % ex
+
+payload = '{' + "Views:%s,Subscribers:%s,Videos:%s" % (utooblist) + '}'
+print payload
+try:
+    conn.request("GET", "/emoncms/input/post.json?node=1&apikey=" + apikey + "&json=" + payload)
+    response = conn.getresponse()
+    conn.close()
+except (httplib.HTTPException, socket.error) as ex:
+    print "Error: %s" % ex
