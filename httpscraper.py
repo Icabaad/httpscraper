@@ -75,15 +75,23 @@ def get_utoob_stats(user, apikey):
     utooburl = 'https://www.googleapis.com/youtube/v3/channels?part=statistics&forUsername=' + user + '&key=' + apikey
     response2 = requests.get(utooburl)
     html2 = response2.content
-    parse = html2.split(":")
-    relist = re.findall("\d{2,}", html2)
-    print relist
+#    parse = html2.split(":")
+    parse = html2.split("\"")
+#print 'parse ', parse
+#print 'Length', len(parse)
+#print 'strip', parse[37:]
+    totalwatched = parse[37]
+    totalsubs = parse[45]
+    totalvids = parse[51]
+#    relist = re.findall("\d{2,}", html2)
+#    print relist
     # print relist[23]
     # print relist[25]
     # print relist[26]
-    totalwatched = relist[0]
-    totalsubs = relist[1]
-    totalvids = relist[2]
+ #   totalwatched = relist[0]
+ #   totalsubs = relist[1]
+ #   totalvids = relist[2]
+ #   if (totalwatched < 9000): print 'The UToobs have shuffled!'
 
     return totalwatched, totalsubs, totalvids
 
@@ -119,10 +127,11 @@ except:
 sql = "INSERT INTO tblTinyRSS(TheDanger, BigMong, Gigs, CooperX) \
 VALUES ('%s', '%s', '%s', '%s')" % \
       (payload[0], payload[1], payload[2], payload[3])
-sql2 = "INSERT INTO tblUToob(Views, Subscribers, Videos) \
-VALUES ('%s', '%s', '%s')" % \
-       (utooblist[0], utooblist[1], utooblist[2])
-print"sql ready for execution...."
+
+if (utooblist[0] > 9000):
+    sql2 = "INSERT INTO tblUToob(Views, Subscribers, Videos) \
+    VALUES ('%s', '%s', '%s')" % (utooblist[0], utooblist[1], utooblist[2])
+    print"sql ready for execution...."
 
 try:
     # Execute the SQL command
