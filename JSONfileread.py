@@ -5,6 +5,10 @@ import MySQLdb
 import os
 import httplib
 
+def deleteContent(fName):
+    with open(fName, "w"):
+        pass
+
 #EMONCMS details
 homedomain = "dangerproxy:8080"
 apikey = 'da3ae5f01b1245c3360ef85ddd8fb451'
@@ -16,15 +20,10 @@ cursor = db.cursor()
 keynames = []
 trial = []
 playcount = 0
-file_object = open('//dangernas/Public/Scrapes/Lastfm/lastfmplay.txt', "rb")
-
-
-#textstr = file.readline()
+file_object = open('//dangernas/Scrapes/Lastfm/lastfmplay.txt', "rb")
 lines = file_object.read( ).splitlines(  )
 file_object.close()
-os.remove('//dangernas/Public/Scrapes/Lastfm/lastfmplay.txt')
-#print(lines)
-#print()
+#os.remove('//dangernas/Scrapes/Lastfm/lastfmplay.txt') #delete file
 
 for line in lines:
     line = line.rstrip( )
@@ -43,7 +42,7 @@ for x in trial:
     sql = "INSERT INTO testtbl(%s, %s) VALUES ('%s', %s)" % (keys[0], keys[1], values[0], values[1]) #, values[1])
     #print(sql)
     playcount += 1
-    print (playcount)
+
     try:
      # Execute the SQL command
         cursor.execute(sql)
@@ -61,7 +60,9 @@ for x in trial:
 
     payload = '{' + "TracksPlayed:"+(str(playcount)) + '}'
 
+print (playcount)
 print (payload)
+
 try:
     conn.request("GET", "/emoncms/input/post.json?node=1&apikey=" + apikey + "&json=" + payload)
     response = conn.getresponse()
@@ -69,4 +70,9 @@ try:
     playcount = 0
 except (httplib.HTTPException, socket.error) as ex:
     print "Error: %s" % ex
+
+deleteContent('//dangernas/Scrapes/Lastfm/lastfmplay.txt')
+os.utime('//dangernas/Scrapes/Lastfm/lastfmplay.txt', None)
+
+
 
